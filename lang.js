@@ -24,6 +24,7 @@ function setLang(lang) {
     initParallax();
     initTypewriter();
     initParticles();
+    initComets();
   });
 })();
 
@@ -228,3 +229,77 @@ function runParticles(canvas) {
     requestAnimationFrame(() => document.body.classList.add('page-ready'));
   });
 })();
+
+
+// ── Кометы ──
+function initComets() {
+  const canvas = document.getElementById('bg-canvas-particles');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function spawnComet() {
+    const W = canvas.width;
+    const H = canvas.height;
+
+    // Стартуем с верхнего или левого края
+    const fromTop = Math.random() > 0.5;
+    const x = fromTop ? Math.random() * W : 0;
+    const y = fromTop ? 0 : Math.random() * H * 0.5;
+
+    const angle = (Math.PI / 180) * (30 + Math.random() * 20); // ~30-50 градусов
+    const speed = 8 + Math.random() * 6;
+    const length = 80 + Math.random() * 120;
+    const alpha = { val: 0 };
+
+    let cx = x, cy = y;
+    let frame = 0;
+    const maxFrames = Math.round((Math.max(W, H) * 1.5) / speed);
+
+    function drawComet() {
+      frame++;
+      cx += Math.cos(angle) * speed;
+      cy += Math.sin(angle) * speed;
+
+      // Fade in/out
+      if (frame < 15) alpha.val = frame / 15;
+      else if (frame > maxFrames - 15) alpha.val = (maxFrames - frame) / 15;
+      else alpha.val = 1;
+
+      alpha.val = Math.max(0, Math.min(1, alpha.val));
+
+      // Хвост кометы
+      const tailX = cx - Math.cos(angle) * length;
+      const tailY = cy - Math.sin(angle) * length;
+
+      const grad = ctx.createLinearGradient(tailX, tailY, cx, cy);
+      grad.addColorStop(0, `rgba(0, 229, 255, 0)`);
+      grad.addColorStop(0.7, `rgba(0, 229, 255, ${alpha.val * 0.3})`);
+      grad.addColorStop(1, `rgba(255, 255, 255, ${alpha.val * 0.9})`);
+
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(cx, cy);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Яркая головка
+      ctx.beginPath();
+      ctx.arc(cx, cy, 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${alpha.val})`;
+      ctx.fill();
+
+      if (frame < maxFrames && cx < W + length && cy < H + length) {
+        requestAnimationFrame(drawComet);
+      }
+    }
+
+    drawComet();
+
+    // Следующая комета через 15-35 секунд
+    setTimeout(spawnComet, 15000 + Math.random() * 20000);
+  }
+
+  // Первая комета через 3-8 секунд после загрузки
+  setTimeout(spawnComet, 3000 + Math.random() * 5000);
+}
