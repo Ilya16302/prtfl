@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — Страница не найдена</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg-deep: #071428;
+    --cyan: #00e5ff;
+    --cyan-glow: rgba(0, 229, 255, 0.4);
+    --glass-bg: rgba(15, 45, 100, 0.45);
+    --glass-border: rgba(60, 180, 255, 0.22);
+    --glass-border-bright: rgba(0, 229, 255, 0.4);
+    --text-main: #f0f8ff;
+    --text-soft: #a0c8e8;
+    --gradient-accent: linear-gradient(90deg, #ff3cac, #00e5ff);
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  body.ready { opacity: 1; }
+  .bg-canvas {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 900px 700px at 30% 40%, rgba(15, 80, 200, 0.25) 0%, transparent 70%),
+      radial-gradient(ellipse 600px 500px at 70% 60%, rgba(20, 160, 240, 0.16) 0%, transparent 70%),
+      linear-gradient(180deg, #071428 0%, #0c2648 50%, #091e38 100%);
+  }
+  .orb {
+    position: absolute; border-radius: 50%; filter: blur(100px);
+    animation: orbDrift 20s ease-in-out infinite alternate;
+  }
+  .orb-1 { width: 500px; height: 500px; background: rgba(20,120,240,0.22); top:-5%; left:-5%; }
+  .orb-2 { width: 350px; height: 350px; background: rgba(30,210,255,0.14); bottom:10%; right:-5%; animation-delay:-6s; }
+  @keyframes orbDrift {
+    0% { transform: translate(0,0); }
+    50% { transform: translate(40px,-30px); }
+    100% { transform: translate(-20px,25px); }
+  }
+  .content {
+    position: relative; z-index: 2;
+    text-align: center; padding: 40px 20px;
+  }
+  .code {
+    font-family: 'Playfair Display', serif;
+    font-size: 8rem; font-weight: 700; line-height: 1;
+    background: linear-gradient(135deg, #b8e4ff 0%, #ffffff 35%, var(--cyan) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 40px rgba(0, 229, 255, 0.2));
+    animation: fadeSlideUp 0.8s ease-out both 0.1s;
+  }
+  .divider {
+    width: 80px; height: 2px;
+    background: var(--gradient-accent);
+    margin: 16px auto;
+    border-radius: 2px;
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+    animation: fadeSlideUp 0.8s ease-out both 0.2s;
+  }
+  .message {
+    font-size: 1.1rem; color: var(--text-soft);
+    font-weight: 300; margin-bottom: 32px;
+    animation: fadeSlideUp 0.8s ease-out both 0.3s;
+  }
+  .home-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 32px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    color: var(--cyan);
+    text-decoration: none;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem; font-weight: 500;
+    backdrop-filter: blur(20px);
+    transition: all 0.35s ease;
+    animation: fadeSlideUp 0.8s ease-out both 0.4s;
+  }
+  .home-btn:hover {
+    border-color: var(--glass-border-bright);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0,10,40,0.4), 0 0 20px rgba(0,229,255,0.08);
+  }
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+  <div class="bg-canvas">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+  <div class="content">
+    <div class="code">404</div>
+    <div class="divider"></div>
+    <p class="message">Страница не найдена</p>
+    <a href="/" class="home-btn">← На главную</a>
+  </div>
+  <script src="/lang.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      requestAnimationFrame(() => document.body.classList.add('ready'));
+    });
+  </script>
+</body>
+</html>

@@ -213,3 +213,18 @@ function runParticles(canvas) {
   }
   draw();
 }
+
+
+// ── Плавное появление страницы ──
+(function() {
+  const style = document.createElement('style');
+  style.textContent = `
+    body { opacity: 0; transition: opacity 0.4s ease; }
+    body.page-ready { opacity: 1; }
+  `;
+  document.head.appendChild(style);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    requestAnimationFrame(() => document.body.classList.add('page-ready'));
+  });
+})();
