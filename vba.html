@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мои VBA — Кузнецов Илья</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-deep: #071428;
+    --cyan: #00e5ff;
+    --cyan-dim: #2cc5e6;
+    --cyan-glow: rgba(0, 229, 255, 0.4);
+    --blue-accent: #3d8bff;
+    --glass-bg: rgba(15, 45, 100, 0.45);
+    --glass-border: rgba(60, 180, 255, 0.22);
+    --glass-border-bright: rgba(0, 229, 255, 0.4);
+    --text-main: #f0f8ff;
+    --text-soft: #a0c8e8;
+    --text-bright: #d0ecff;
+    --gradient-accent: linear-gradient(90deg, #ff3cac, #00e5ff);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-main);
+    position: relative;
+    min-height: 100vh;
+  }
+
+  /* ── Background ── */
+  .bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 900px 700px at 30% 40%, rgba(15, 80, 200, 0.25) 0%, transparent 70%),
+      radial-gradient(ellipse 600px 500px at 70% 60%, rgba(20, 160, 240, 0.16) 0%, transparent 70%),
+      radial-gradient(ellipse 400px 400px at 50% 20%, rgba(30, 210, 255, 0.1) 0%, transparent 60%),
+      linear-gradient(180deg, #071428 0%, #0c2648 50%, #091e38 100%);
+  }
+
+  .light-ray {
+    position: absolute;
+    width: 200px;
+    height: 800px;
+    opacity: 0.07;
+    filter: blur(40px);
+    transform-origin: top center;
+    animation: rayPulse 12s ease-in-out infinite alternate;
+  }
+  .light-ray-1 {
+    background: linear-gradient(180deg, var(--cyan), transparent);
+    top: -100px; left: 20%;
+    transform: rotate(-15deg);
+    --r: -15deg;
+  }
+  .light-ray-2 {
+    background: linear-gradient(180deg, var(--blue-accent), transparent);
+    top: -100px; right: 15%;
+    transform: rotate(12deg);
+    animation-delay: -4s;
+    opacity: 0.05;
+    --r: 12deg;
+  }
+
+  @keyframes rayPulse {
+    0%   { opacity: 0.04; transform: rotate(var(--r, -15deg)) scaleY(1); }
+    50%  { opacity: 0.09; transform: rotate(var(--r, -15deg)) scaleY(1.05); }
+    100% { opacity: 0.05; transform: rotate(var(--r, -15deg)) scaleY(0.97); }
+  }
+
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    animation: orbDrift 20s ease-in-out infinite alternate;
+  }
+  .orb-1 { width: 500px; height: 500px; background: rgba(20, 120, 240, 0.22); top: -5%; left: -5%; }
+  .orb-2 { width: 350px; height: 350px; background: rgba(30, 210, 255, 0.14); bottom: 10%; right: -5%; animation-delay: -6s; }
+
+  @keyframes orbDrift {
+    0%   { transform: translate(0, 0); }
+    50%  { transform: translate(40px, -30px); }
+    100% { transform: translate(-20px, 25px); }
+  }
+
+  /* ── Content ── */
+  .content {
+    position: relative;
+    z-index: 2;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 36px 24px 50px;
+  }
+
+  /* ── Top bar ── */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    animation: fadeSlideDown 0.8s ease-out both;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: var(--text-soft);
+    text-decoration: none;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: all 0.35s ease;
+  }
+
+  .back-btn:hover {
+    border-color: var(--glass-border-bright);
+    color: var(--cyan);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.06);
+  }
+
+  .back-btn .arrow { font-size: 1.1rem; transition: transform 0.3s ease; }
+  .back-btn:hover .arrow { transform: translateX(-3px); }
+
+  .lang-switch {
+    display: flex;
+    gap: 3px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 4px;
+  }
+
+  .lang-btn {
+    padding: 7px 18px;
+    border: none;
+    border-radius: 9px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-soft);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.35s ease;
+    letter-spacing: 0.5px;
+  }
+
+  .lang-btn.active {
+    background: rgba(0, 229, 255, 0.12);
+    color: var(--cyan);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 15px rgba(0, 229, 255, 0.05);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+  }
+
+  .lang-btn:not(.active) { border: 1px solid transparent; }
+  .lang-btn:hover:not(.active) { color: var(--text-bright); background: rgba(0, 180, 255, 0.06); }
+
+  /* ── Page Header ── */
+  .page-header {
+    text-align: center;
+    margin-bottom: 36px;
+    animation: fadeSlideUp 1s ease-out both 0.2s;
+  }
+
+  .page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #b8e4ff 0%, #ffffff 35%, var(--cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.15;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 30px rgba(0, 229, 255, 0.15));
+  }
+
+  .page-header .subtitle {
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: var(--text-soft);
+    letter-spacing: 1px;
+  }
+
+  .page-header .divider {
+    width: 80px;
+    height: 2px;
+    background: var(--gradient-accent);
+    margin: 14px auto 0;
+    border-radius: 2px;
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+  }
+
+  /* ── Project Card ── */
+  .project-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(30px) saturate(1.4);
+    -webkit-backdrop-filter: blur(30px) saturate(1.4);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+  }
+
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.4), transparent);
+  }
+
+  .project-card::after {
+    content: '';
+    position: absolute;
+    top: -1px; right: -1px;
+    width: 50px; height: 50px;
+    border-top: 1px solid rgba(0, 229, 255, 0.25);
+    border-right: 1px solid rgba(0, 229, 255, 0.25);
+    border-radius: 0 20px 0 0;
+    pointer-events: none;
+  }
+
+  .project-card:hover {
+    border-color: var(--glass-border-bright);
+    box-shadow: 0 10px 40px rgba(0, 10, 40, 0.35), 0 0 30px rgba(0, 229, 255, 0.03);
+  }
+
+  .project-card.expanded {
+    box-shadow: 0 20px 60px rgba(0, 10, 40, 0.5), 0 0 40px rgba(0, 229, 255, 0.04), inset 0 1px 0 rgba(0, 229, 255, 0.08);
+  }
+
+  /* Card Header */
+  .card-header {
+    padding: 24px 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+    transition: padding 0.3s ease;
+    user-select: none;
+  }
+
+  .expanded .card-header {
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(60, 180, 255, 0.1);
+  }
+
+  .card-header .project-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(0, 229, 255, 0.06);
+    border: 1px solid rgba(0, 229, 255, 0.12);
+    font-size: 22px;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.06);
+  }
+
+  .card-header .header-text { flex: 1; min-width: 0; }
+
+  .card-header h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 3px;
+  }
+
+  .card-header .header-brief {
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    font-weight: 300;
+    line-height: 1.4;
+  }
+
+  .card-header .project-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgba(0, 229, 255, 0.25);
+    flex-shrink: 0;
+    margin-right: 2px;
+  }
+
+  .card-chevron {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(60, 180, 255, 0.15);
+    background: rgba(0, 229, 255, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.4s ease;
+    color: var(--text-soft);
+  }
+
+  .card-chevron svg {
+    width: 16px; height: 16px;
+    stroke: currentColor; stroke-width: 2; fill: none;
+    transition: transform 0.4s ease;
+  }
+
+  .expanded .card-chevron { border-color: rgba(0, 229, 255, 0.3); color: var(--cyan); background: rgba(0, 229, 255, 0.08); }
+  .expanded .card-chevron svg { transform: rotate(180deg); }
+  .card-header:hover .card-chevron { border-color: rgba(0, 229, 255, 0.3); color: var(--cyan); }
+
+  /* Card Body */
+  .card-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
+    opacity: 0;
+  }
+
+  .expanded .card-body { opacity: 1; }
+
+  .card-body-inner { padding: 20px 32px 28px; }
+
+  .project-subtitle {
+    font-size: 0.85rem;
+    color: var(--cyan-dim);
+    font-weight: 400;
+  }
+
+  .project-desc {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text-soft);
+    font-weight: 300;
+    margin-bottom: 18px;
+  }
+
+  .project-desc strong {
+    color: var(--text-main);
+    font-weight: 500;
+  }
+
+  /* ── Buttons section ── */
+  .buttons-section {
+    margin-bottom: 18px;
+  }
+
+  .buttons-section-title {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text-bright);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .macro-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .macro-btn-card {
+    display: flex;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 1px solid rgba(60, 180, 255, 0.12);
+    border-radius: 14px;
+    background: rgba(12, 35, 80, 0.35);
+    transition: all 0.35s ease;
+  }
+
+  .macro-btn-card:hover {
+    border-color: rgba(0, 229, 255, 0.25);
+    background: rgba(15, 45, 100, 0.4);
+  }
+
+  .btn-badge {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(0, 229, 255, 0.08);
+    border: 1px solid rgba(0, 229, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: var(--cyan);
+    font-weight: 600;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .btn-content h4 {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text-main);
+    margin-bottom: 3px;
+  }
+
+  .btn-content p {
+    font-size: 0.84rem;
+    color: var(--text-soft);
+    font-weight: 300;
+    line-height: 1.55;
+  }
+
+  .btn-content p strong {
+    color: var(--text-main);
+    font-weight: 400;
+  }
+
+  /* ── Feature list ── */
+  .feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 22px;
+  }
+
+  .feature-list li {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-soft);
+    font-weight: 300;
+    padding-left: 20px;
+    position: relative;
+  }
+
+  .feature-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan-glow);
+  }
+
+  .feature-list li strong {
+    color: var(--text-main);
+    font-weight: 500;
+  }
+
+  /* ── Screenshots ── */
+  .screenshots-label {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-soft);
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .screenshots {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+
+  .screenshots-7 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .screenshots-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .screenshot-item {
+    position: relative;
+    border-radius: 12px;
+    border: 1px solid rgba(60, 180, 255, 0.12);
+    background: rgba(10, 25, 60, 0.45);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.35s ease;
+    aspect-ratio: 16 / 10;
+  }
+
+  .screenshot-item:hover {
+    border-color: var(--glass-border-bright);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 10, 40, 0.4), 0 0 15px rgba(0, 229, 255, 0.06);
+  }
+
+  .screenshot-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .screenshot-item:hover img { transform: scale(1.05); }
+
+  .screenshot-item .zoom-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(7, 20, 40, 0.45);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-size: 1.4rem;
+    color: var(--cyan);
+    pointer-events: none;
+  }
+
+  .screenshot-item:hover .zoom-icon { opacity: 1; }
+
+  .screenshot-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 4px 8px;
+    background: rgba(7, 20, 40, 0.65);
+    font-size: 0.68rem;
+    color: var(--text-soft);
+    font-weight: 300;
+    text-align: center;
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    transform: translateY(100%);
+    transition: all 0.3s ease;
+  }
+
+  .screenshot-item:hover .screenshot-caption {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Lightbox ── */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(5, 15, 35, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    cursor: zoom-out;
+    animation: lbFadeIn 0.25s ease-out;
+  }
+
+  .lightbox.active { display: flex; }
+
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 85vh;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 229, 255, 0.15);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(0, 229, 255, 0.05);
+    object-fit: contain;
+    cursor: default;
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 24px;
+    right: 32px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    background: rgba(15, 45, 100, 0.6);
+    color: var(--text-soft);
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .lightbox-close:hover {
+    color: var(--cyan);
+    border-color: var(--glass-border-bright);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
+  }
+
+  .lightbox-caption {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 24px;
+    border-radius: 12px;
+    background: rgba(15, 45, 100, 0.65);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+    color: var(--text-soft);
+    font-size: 0.88rem;
+    font-weight: 300;
+    white-space: nowrap;
+  }
+
+  .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 229, 255, 0.15);
+    background: rgba(15, 45, 100, 0.5);
+    color: var(--text-soft);
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .lightbox-nav:hover {
+    color: var(--cyan);
+    border-color: var(--glass-border-bright);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
+  }
+
+  .lightbox-prev { left: 24px; }
+  .lightbox-next { right: 24px; }
+
+  @keyframes lbFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 10px 0 30px;
+    color: var(--text-soft);
+    font-size: 0.78rem;
+    font-weight: 300;
+    opacity: 0.35;
+    animation: fadeIn 1s ease-out both 0.8s;
+  }
+
+  .anim-up { animation: fadeSlideUp 0.9s ease-out both; }
+  .anim-up-1 { animation-delay: 0.4s; }
+  .anim-up-2 { animation-delay: 0.6s; }
+  .anim-up-3 { animation-delay: 0.8s; }
+  .anim-up-4 { animation-delay: 1.0s; }
+  .anim-up-5 { animation-delay: 1.2s; }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  @media (max-width: 640px) {
+    .content { padding: 24px 14px 40px; }
+    .top-bar { margin-bottom: 20px; }
+    .back-btn { padding: 8px 14px; font-size: 0.82rem; }
+    .lang-btn { padding: 6px 14px; font-size: 12px; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 1.8rem; }
+    .page-header .subtitle { font-size: 0.82rem; }
+    .project-card { border-radius: 16px; }
+    .card-header { padding: 16px 16px; gap: 12px; }
+    .card-header h3 { font-size: 1.1rem; }
+    .card-header .header-brief { font-size: 0.78rem; }
+    .card-body-inner { padding: 14px 16px 20px; }
+    .project-desc { font-size: 0.88rem; }
+    .buttons-section-title { font-size: 0.85rem; }
+    .macro-btn-card { flex-direction: column; gap: 8px; padding: 12px 14px; }
+    .btn-content h4 { font-size: 0.88rem; }
+    .btn-content p { font-size: 0.8rem; }
+    .feature-list li { font-size: 0.85rem; }
+    .screenshots { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .screenshots-7 { grid-template-columns: repeat(3, 1fr); }
+    .screenshots-4 { grid-template-columns: repeat(2, 1fr); }
+    .screenshot-item { border-radius: 10px; }
+    .lightbox { padding: 20px 12px; }
+    .lightbox img { max-width: 95vw; max-height: 80vh; border-radius: 12px; }
+    .lightbox-prev { left: 8px; }
+    .lightbox-next { right: 8px; }
+    .lightbox-close { top: 12px; right: 12px; width: 38px; height: 38px; }
+    .lightbox-nav { width: 40px; height: 40px; }
+  }
+
+  @media (max-width: 380px) {
+    .content { padding: 18px 10px 32px; }
+    .page-header h1 { font-size: 1.6rem; }
+    .card-header { padding: 14px 12px; }
+    .card-body-inner { padding: 12px 12px 18px; }
+    .screenshots { grid-template-columns: repeat(2, 1fr); }
+    .screenshots-7 { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Background -->
+  <div class="bg-canvas">
+    <div class="light-ray light-ray-1"></div>
+    <div class="light-ray light-ray-2"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+    <button class="lightbox-close" onclick="closeLightbox(event)">✕</button>
+    <button class="lightbox-nav lightbox-prev" onclick="navLightbox(-1, event)">‹</button>
+    <img id="lightbox-img" src="" alt="">
+    <button class="lightbox-nav lightbox-next" onclick="navLightbox(1, event)">›</button>
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+  </div>
+
+  <div class="content">
+
+    <!-- Top bar -->
+    <div class="top-bar">
+      <a href="index.html" class="back-btn">
+        <span class="arrow">←</span>
+        <span data-ru="Главная" data-en="Home">Главная</span>
+      </a>
+      <div class="lang-switch">
+        <button class="lang-btn active" onclick="setLang('ru')" id="btn-ru">RU</button>
+        <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+      </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 data-ru="Мои VBA" data-en="My VBA">Мои VBA</h1>
+      <p class="subtitle" data-ru="Макросы и автоматизация в Excel" data-en="Excel macros & automation">Макросы и автоматизация в Excel</p>
+      <div class="divider"></div>
+    </div>
+
+    <!-- ═══════════ Macro 1: Создание ежедневной отчётности ═══════════ -->
+    <div class="project-card anim-up anim-up-1" id="macro-1">
+      <div class="card-header" onclick="toggleCard('macro-1')">
+        <div class="project-icon">📊</div>
+        <div class="header-text">
+          <h3 data-ru="Создание ежедневной отчётности" data-en="Daily Report Generation">Создание ежедневной отчётности</h3>
+          <span class="header-brief" data-ru="Автоматический сбор данных, формирование и рассылка отчётов через Outlook" data-en="Automated data collection, report generation & Outlook email distribution">Автоматический сбор данных, формирование и рассылка отчётов через Outlook</span>
+        </div>
+        <span class="project-number">01</span>
+        <div class="card-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="card-body">
+        <div class="card-body-inner">
+          <p class="project-desc"
+             data-ru="Макрос-комбайн для ежедневной отчётности. На главном листе — инструкция, колонки для подсчёта, список адресов рассылки и <strong>три кнопки</strong>, каждая из которых запускает свой процесс. Вся работа с данными происходит автоматически: файлы берутся с сетевой шары, обрабатываются и сохраняются обратно."
+             data-en="An all-in-one macro for daily reporting. The main sheet contains instructions, calculation columns, a mailing list, and <strong>three buttons</strong>, each launching its own process. All data handling is fully automatic: files are pulled from a network share, processed, and saved back.">
+            Макрос-комбайн для ежедневной отчётности. На главном листе — инструкция, колонки для подсчёта, список адресов рассылки и <strong>три кнопки</strong>, каждая из которых запускает свой процесс. Вся работа с данными происходит автоматически: файлы берутся с сетевой шары, обрабатываются и сохраняются обратно.
+          </p>
+
+          <div class="buttons-section">
+            <div class="buttons-section-title" data-ru="⚙️ Три кнопки — три процесса:" data-en="⚙️ Three buttons — three processes:">⚙️ Три кнопки — три процесса:</div>
+            <div class="macro-buttons">
+              <div class="macro-btn-card">
+                <div class="btn-badge">1</div>
+                <div class="btn-content">
+                  <h4 data-ru="Обновить СПК" data-en="Update SPC">Обновить СПК</h4>
+                  <p data-ru="Забирает с сетевой шары <strong>3 исходных Excel-файла</strong> (два от лаборатории контроля, один с количеством сваренных стыков) и <strong>форму отчёта</strong> со вчерашними данными. Определяет нужную дату, находит данные за позавчерашний день во всех файлах, заполняет форму и сохраняет готовый отчёт обратно на шару."
+                     data-en="Pulls <strong>3 source Excel files</strong> from the network share (two from the inspection lab, one with welded joint counts) plus <strong>yesterday's report template</strong>. Determines the target date, extracts data for the day before yesterday from all files, fills in the report form, and saves the completed report back to the share.">Забирает с сетевой шары <strong>3 исходных Excel-файла</strong> (два от лаборатории контроля, один с количеством сваренных стыков) и <strong>форму отчёта</strong> со вчерашними данными. Определяет нужную дату, находит данные за позавчерашний день во всех файлах, заполняет форму и сохраняет готовый отчёт обратно на шару.</p>
+                </div>
+              </div>
+              <div class="macro-btn-card">
+                <div class="btn-badge">2</div>
+                <div class="btn-content">
+                  <h4 data-ru="Отправить СПК" data-en="Send SPC">Отправить СПК</h4>
+                  <p data-ru="Берёт готовый отчёт с шары и отправляет его через <strong>Outlook</strong> всем адресатам из списка на главном листе. Автоматически подставляет тему письма, текст и подпись — остаётся только нажать одну кнопку."
+                     data-en="Takes the completed report from the share and sends it via <strong>Outlook</strong> to all recipients listed on the main sheet. Automatically inserts the email subject, body text, and signature — just one button press.">Берёт готовый отчёт с шары и отправляет его через <strong>Outlook</strong> всем адресатам из списка на главном листе. Автоматически подставляет тему письма, текст и подпись — остаётся только нажать одну кнопку.</p>
+                </div>
+              </div>
+              <div class="macro-btn-card">
+                <div class="btn-badge">3</div>
+                <div class="btn-content">
+                  <h4 data-ru="Обновить СПК с динамикой" data-en="Update SPC with Trends">Обновить СПК с динамикой</h4>
+                  <p data-ru="Нажимается <strong>раз в неделю по четвергам</strong>. Перебирает все отчёты на шаре за последние 7 дней, собирает с них данные и записывает в сводный файл, в котором хранится статистика <strong>за все дни</strong>."
+                     data-en="Pressed <strong>once a week on Thursdays</strong>. Iterates through all reports on the share for the last 7 days, collects the data, and writes it into a summary file that stores statistics <strong>for every single day</strong>.">Нажимается <strong>раз в неделю по четвергам</strong>. Перебирает все отчёты на шаре за последние 7 дней, собирает с них данные и записывает в сводный файл, в котором хранится статистика <strong>за все дни</strong>.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p class="screenshots-label" data-ru="Скриншоты (нажмите для увеличения):" data-en="Screenshots (click to enlarge):">Скриншоты (нажмите для увеличения):</p>
+          <div class="screenshots" id="gallery-spk">
+            <div class="screenshot-item" onclick="openLightbox('gallery-spk', 0)">
+              <img src="photos_macros/everyday_otchet/01_main.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Главная" data-en="Main sheet">Главная</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-spk', 1)">
+              <img src="photos_macros/everyday_otchet/02_done.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Уведомление" data-en="Notification">Уведомление</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-spk', 2)">
+              <img src="photos_macros/everyday_otchet/03_report.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Готовый отчёт" data-en="Completed report">Готовый отчёт</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-spk', 3)">
+              <img src="photos_macros/everyday_otchet/04_outlook.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Письмо в Outlook" data-en="Outlook email">Письмо в Outlook</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-spk', 4)">
+              <img src="photos_macros/everyday_otchet/05_dynamics.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="СПК с динамикой" data-en="SPC with trends">СПК с динамикой</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ Macro 2: Проверка отчётов ═══════════ -->
+    <div class="project-card anim-up anim-up-2" id="macro-2">
+      <div class="card-header" onclick="toggleCard('macro-2')">
+        <div class="project-icon">🔍</div>
+        <div class="header-text">
+          <h3 data-ru="Проверка отчётов сварки" data-en="Weld Report Verification">Проверка отчётов сварки</h3>
+          <span class="header-brief" data-ru="Проверка стыков по журналу, допускам и % контроля + сохранение с подписью" data-en="Joint verification against log, certifications & inspection rates + signed saving">Проверка стыков по журналу, допускам и % контроля + сохранение с подписью</span>
+        </div>
+        <span class="project-number">02</span>
+        <div class="card-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="card-body">
+        <div class="card-body-inner">
+          <p class="project-desc"
+             data-ru="Макрос для полной автоматической проверки сварочных отчётов. На главном листе — инструкция и поле для выбора проверяющего (от этого зависит подпись). По нажатию кнопки <strong>«Проверить отчёты»</strong> открывается диалог выбора папки — дальше всё происходит автоматически."
+             data-en="A macro for fully automated weld report verification. The main sheet contains instructions and a field to select the reviewer (which determines the signature). Clicking the <strong>'Check Reports'</strong> button opens a folder picker — everything else is fully automated.">
+            Макрос для полной автоматической проверки сварочных отчётов. На главном листе — инструкция и поле для выбора проверяющего (от этого зависит подпись). По нажатию кнопки <strong>«Проверить отчёты»</strong> открывается диалог выбора папки — дальше всё происходит автоматически.
+          </p>
+
+          <div class="buttons-section">
+            <div class="buttons-section-title" data-ru="📥 Этап 1 — Импорт данных:" data-en="📥 Stage 1 — Data Import:">📥 Этап 1 — Импорт данных:</div>
+            <div class="macro-buttons" style="margin-bottom: 16px;">
+              <div class="macro-btn-card">
+                <div class="btn-badge">1</div>
+                <div class="btn-content">
+                  <h4 data-ru="Импорт отчётов" data-en="Report Import">Импорт отчётов</h4>
+                  <p data-ru="Из выбранной папки импортируются <strong>все данные по сварным соединениям</strong> — каждый стык со всеми параметрами."
+                     data-en="All <strong>weld joint data</strong> is imported from the selected folder — every joint with all its parameters.">Из выбранной папки импортируются <strong>все данные по сварным соединениям</strong> — каждый стык со всеми параметрами.</p>
+                </div>
+              </div>
+              <div class="macro-btn-card">
+                <div class="btn-badge">2</div>
+                <div class="btn-content">
+                  <h4 data-ru="Подгрузка базы данных и журнала" data-en="Database & Log Loading">Подгрузка базы данных и журнала</h4>
+                  <p data-ru="Подключаются <strong>база данных сварщиков</strong> (допуски каждого: диапазон диаметров, материалы, толщины) и <strong>сварочный журнал</strong> (сваренные и несваренные стыки). Импортируются <strong>только релевантные данные</strong> — то, что относится к проверяемым отчётам."
+                     data-en="The <strong>welder database</strong> (each welder's certifications: diameter ranges, materials, thicknesses) and the <strong>welding log</strong> (completed and pending joints) are loaded. <strong>Only relevant data</strong> is imported — what pertains to the reports being checked.">Подключаются <strong>база данных сварщиков</strong> (допуски каждого: диапазон диаметров, материалы, толщины) и <strong>сварочный журнал</strong> (сваренные и несваренные стыки). Импортируются <strong>только релевантные данные</strong> — то, что относится к проверяемым отчётам.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="buttons-section-title" data-ru="✅ Этап 2 — Проверка каждого стыка:" data-en="✅ Stage 2 — Joint-by-Joint Verification:">✅ Этап 2 — Проверка каждого стыка:</div>
+            <div class="macro-buttons" style="margin-bottom: 16px;">
+              <div class="macro-btn-card">
+                <div class="btn-badge">📐</div>
+                <div class="btn-content">
+                  <h4 data-ru="Размеры и материал" data-en="Dimensions & Material">Размеры и материал</h4>
+                  <p data-ru="По изометрии, типу и номеру стыка сверяются <strong>размеры</strong> и <strong>материал</strong> со сварочным журналом. Совпадения подсвечиваются <strong style='color:#4ade80;'>зелёным</strong>, расхождения — <strong style='color:#f87171;'>красным</strong>. При расхождении макрос предлагает корректные значения из журнала."
+                     data-en="Based on isometry, joint type and number, <strong>dimensions</strong> and <strong>material</strong> are cross-checked against the welding log. Matches are highlighted in <strong style='color:#4ade80;'>green</strong>, mismatches in <strong style='color:#f87171;'>red</strong>. On mismatch, the macro suggests correct values from the log.">По изометрии, типу и номеру стыка сверяются <strong>размеры</strong> и <strong>материал</strong> со сварочным журналом. Совпадения подсвечиваются <strong style='color:#4ade80;'>зелёным</strong>, расхождения — <strong style='color:#f87171;'>красным</strong>. При расхождении макрос предлагает корректные значения из журнала.</p>
+                </div>
+              </div>
+              <div class="macro-btn-card">
+                <div class="btn-badge">🪪</div>
+                <div class="btn-content">
+                  <h4 data-ru="Клеймо — проверка допуска" data-en="Stamp — Certification Check">Клеймо — проверка допуска</h4>
+                  <p data-ru="Клеймо сварщика проверяется по <strong>базе данных допусков</strong> — имеет ли этот сварщик право варить данный диаметр, материал и толщину. Результат выводится в отдельном столбце с цветовой подсветкой."
+                     data-en="The welder's stamp is verified against the <strong>certification database</strong> — whether the welder is authorized for the given diameter, material, and wall thickness. The result is displayed in a dedicated column with color coding.">Клеймо сварщика проверяется по <strong>базе данных допусков</strong> — имеет ли этот сварщик право варить данный диаметр, материал и толщину. Результат выводится в отдельном столбце с цветовой подсветкой.</p>
+                </div>
+              </div>
+              <div class="macro-btn-card">
+                <div class="btn-badge">%</div>
+                <div class="btn-content">
+                  <h4 data-ru="Клеймо — оптимизация по % контроля" data-en="Stamp — Inspection Rate Optimization">Клеймо — оптимизация по % контроля</h4>
+                  <p data-ru="Макрос анализирует <strong>процент контроля по линии</strong> — например, при норме 10% контролируется 1 стык из 10. Если у клейма BZA4 сварено 7 стыков и 1 проконтролен, а у B81H — 10 стыков и тоже 1 проконтролен, логичнее поставить BZA4, чтобы лишний раз не назначать контроль. Если в отчёте стоит менее оптимальное клеймо — макрос <strong>предлагает замену</strong> в отдельном столбце: клеймо, которое подходит и по допуску, и по проценту контроля."
+                     data-en="The macro analyzes the <strong>inspection rate per line</strong> — e.g., at a 10% rate, 1 joint out of 10 is inspected. If stamp BZA4 has 7 joints welded with 1 inspected, and B81H has 10 joints with only 1 inspected, it's smarter to assign BZA4 to avoid triggering an extra inspection. If the report lists a less optimal stamp, the macro <strong>suggests a replacement</strong> in a separate column: a stamp that fits both the certification and the inspection rate.">Макрос анализирует <strong>процент контроля по линии</strong> — например, при норме 10% контролируется 1 стык из 10. Если у клейма BZA4 сварено 7 стыков и 1 проконтролен, а у B81H — 10 стыков и тоже 1 проконтролен, логичнее поставить BZA4, чтобы лишний раз не назначать контроль. Если в отчёте стоит менее оптимальное клеймо — макрос <strong>предлагает замену</strong> в отдельном столбце: клеймо, которое подходит и по допуску, и по проценту контроля.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="buttons-section-title" data-ru="💾 Этап 3 — Результат и сохранение:" data-en="💾 Stage 3 — Results & Saving:">💾 Этап 3 — Результат и сохранение:</div>
+            <div class="macro-buttons">
+              <div class="macro-btn-card">
+                <div class="btn-badge">📋</div>
+                <div class="btn-content">
+                  <h4 data-ru="Сводный лист с подсветкой" data-en="Summary Sheet with Highlighting">Сводный лист с подсветкой</h4>
+                  <p data-ru="Все данные собраны на одном листе с <strong>цветовой подсветкой</strong>: размеры и материал — <strong style='color:#4ade80;'>зелёный</strong>/<strong style='color:#f87171;'>красный</strong>; клеймо дублируется в нескольких столбцах — один для проверки допуска, другой для допуска + % контроля, и отдельный столбец с <strong>предложением оптимального клейма</strong>."
+                     data-en="All data is gathered on a single sheet with <strong>color-coded highlighting</strong>: dimensions and material — <strong style='color:#4ade80;'>green</strong>/<strong style='color:#f87171;'>red</strong>; the stamp is duplicated across several columns — one for certification check, another for certification + inspection rate, plus a separate column with a <strong>suggested optimal stamp</strong>.">Все данные собраны на одном листе с <strong>цветовой подсветкой</strong>: размеры и материал — <strong style='color:#4ade80;'>зелёный</strong>/<strong style='color:#f87171;'>красный</strong>; клеймо дублируется в нескольких столбцах — один для проверки допуска, другой для допуска + % контроля, и отдельный столбец с <strong>предложением оптимального клейма</strong>.</p>
+                </div>
+              </div>
+              <div class="macro-btn-card">
+                <div class="btn-badge">💾</div>
+                <div class="btn-content">
+                  <h4 data-ru="UserForm и сохранение" data-en="UserForm & Saving">UserForm и сохранение</h4>
+                  <p data-ru="На сводном листе есть кнопка, открывающая <strong>UserForm</strong>. В ней чекбоксами отмечаются внесённые корректировки (клеймо, способ сварки, размеры, материал). По нажатию <strong>«Сохранить отчёт»</strong> макрос вставляет подпись проверяющего (считывается с шары по выбору на главном листе), сохраняет исправленный отчёт на рабочий стол в папку <strong>«Проверенные»</strong>, а в имя файла записывает, какие именно изменения были внесены."
+                     data-en="The summary sheet has a button that opens a <strong>UserForm</strong>. Checkboxes are used to mark the corrections made (stamp, welding method, dimensions, material). Clicking <strong>'Save Report'</strong> inserts the reviewer's signature (read from the network share based on the main sheet selection), saves the corrected report to the desktop in a <strong>'Checked'</strong> folder, and appends the list of changes to the file name.">На сводном листе есть кнопка, открывающая <strong>UserForm</strong>. В ней чекбоксами отмечаются внесённые корректировки (клеймо, способ сварки, размеры, материал). По нажатию <strong>«Сохранить отчёт»</strong> макрос вставляет подпись проверяющего (считывается с шары по выбору на главном листе), сохраняет исправленный отчёт на рабочий стол в папку <strong>«Проверенные»</strong>, а в имя файла записывает, какие именно изменения были внесены.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p class="screenshots-label" data-ru="Скриншоты (нажмите для увеличения):" data-en="Screenshots (click to enlarge):">Скриншоты (нажмите для увеличения):</p>
+          <div class="screenshots screenshots-7" id="gallery-check">
+            <div class="screenshot-item" onclick="openLightbox('gallery-check', 0)">
+              <img src="photos_macros/report_check/01_main.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Главная" data-en="Main sheet">Главная</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-check', 1)">
+              <img src="photos_macros/report_check/02_folder.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Выбор папки" data-en="Folder picker">Выбор папки</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-check', 2)">
+              <img src="photos_macros/report_check/03_summary.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Сводный лист" data-en="Summary sheet">Сводный лист</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-check', 3)">
+              <img src="photos_macros/report_check/04_welders.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="База сварщиков" data-en="Welder database">База сварщиков</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-check', 4)">
+              <img src="photos_macros/report_check/05_journal.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Сварочный журнал" data-en="Welding log">Сварочный журнал</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-check', 5)">
+              <img src="photos_macros/report_check/06_userform.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="UserForm" data-en="UserForm">UserForm</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-check', 6)">
+              <img src="photos_macros/report_check/07_saved.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Сохранённые отчёты" data-en="Saved reports">Сохранённые отчёты</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ Macro 3: Подбор клейм ═══════════ -->
+    <div class="project-card anim-up anim-up-3" id="macro-3">
+      <div class="card-header" onclick="toggleCard('macro-3')">
+        <div class="project-icon">🪪</div>
+        <div class="header-text">
+          <h3 data-ru="Подбор клейм для наряд-задания" data-en="Stamp Selection for Work Orders">Подбор клейм для наряд-задания</h3>
+          <span class="header-brief" data-ru="Автоподбор сварщиков по допускам и оптимальному % контроля" data-en="Auto-selection of welders by certifications & optimal inspection rate">Автоподбор сварщиков по допускам и оптимальному % контроля</span>
+        </div>
+        <span class="project-number">03</span>
+        <div class="card-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="card-body">
+        <div class="card-body-inner">
+          <p class="project-desc"
+             data-ru="Приходит <strong>наряд-задание</strong> — список стыков, которые будут вариться в ближайшее время. Задача — подобрать для каждого стыка сварщика, у которого есть допуск на данный диаметр, толщину и материал, и при этом выбрать того, кто <strong>оптимально вписывается по проценту контроля</strong>, чтобы не назначать лишнюю проверку на линии."
+             data-en="A <strong>work order</strong> arrives — a list of joints to be welded in the near future. The task is to assign a welder to each joint who holds the proper certification for the diameter, thickness, and material, while also selecting the one who <strong>best fits the inspection rate</strong> so no unnecessary inspections are triggered on the line.">
+            Приходит <strong>наряд-задание</strong> — список стыков, которые будут вариться в ближайшее время. Задача — подобрать для каждого стыка сварщика, у которого есть допуск на данный диаметр, толщину и материал, и при этом выбрать того, кто <strong>оптимально вписывается по проценту контроля</strong>, чтобы не назначать лишнюю проверку на линии.
+          </p>
+
+          <div class="buttons-section">
+            <div class="buttons-section-title" data-ru="⚙️ Две кнопки — два этапа:" data-en="⚙️ Two buttons — two stages:">⚙️ Две кнопки — два этапа:</div>
+            <div class="macro-buttons">
+
+              <div class="macro-btn-card">
+                <div class="btn-badge">1</div>
+                <div class="btn-content">
+                  <h4 data-ru="Импорт данных" data-en="Data Import">Импорт данных</h4>
+                  <p data-ru="По нажатию первой кнопки импортируются <strong>база данных сварщиков</strong> и <strong>сварочный журнал</strong>. Затем для каждого стыка из наряд-задания макрос находит в журнале и записывает <strong>диаметр</strong>, <strong>толщину</strong>, <strong>материал</strong> и <strong>процент контроля</strong> линии. Если какой-то стык не найден в журнале — он помечается <strong style='color:#f87171;'>красным цветом</strong>."
+                     data-en="Pressing the first button imports the <strong>welder database</strong> and <strong>welding log</strong>. The macro then looks up each joint from the work order in the log and fills in the <strong>diameter</strong>, <strong>wall thickness</strong>, <strong>material</strong>, and <strong>inspection rate</strong> for the line. If a joint is not found in the log, it is flagged in <strong style='color:#f87171;'>red</strong>.">По нажатию первой кнопки импортируются <strong>база данных сварщиков</strong> и <strong>сварочный журнал</strong>. Затем для каждого стыка из наряд-задания макрос находит в журнале и записывает <strong>диаметр</strong>, <strong>толщину</strong>, <strong>материал</strong> и <strong>процент контроля</strong> линии. Если какой-то стык не найден в журнале — он помечается <strong style='color:#f87171;'>красным цветом</strong>.</p>
+                </div>
+              </div>
+
+              <div class="macro-btn-card">
+                <div class="btn-badge">2</div>
+                <div class="btn-content">
+                  <h4 data-ru="Подбор клейм" data-en="Stamp Selection">Подбор клейм</h4>
+                  <p data-ru="По нажатию второй кнопки макрос для каждого стыка перебирает всех сварщиков из базы, отсеивает тех, у кого <strong>нет допуска</strong> на данные параметры, а из оставшихся выбирает того, кто <strong>лучше всего подходит по проценту контроля</strong> — чтобы его стык не стал лишним контрольным и линия не была переконтролирована. Если у всех сварщиков на линии процент контроля уже закрыт, макрос <strong>подбирает нового сварщика</strong>, который подходит по допуску на максимальное количество стыков с этой линии. Результат — готовое наряд-задание с проставленными клеймами."
+                     data-en="Pressing the second button makes the macro iterate through all welders for each joint, filter out those who <strong>lack certification</strong>, and select the one who <strong>best fits the inspection rate</strong>. If all welders on a line already have their inspection quota filled, the macro <strong>selects a new welder</strong> whose certification covers the maximum number of joints on that line. The result is a completed work order with assigned stamps.">По нажатию второй кнопки макрос для каждого стыка перебирает всех сварщиков из базы, отсеивает тех, у кого <strong>нет допуска</strong> на данные параметры, а из оставшихся выбирает того, кто <strong>лучше всего подходит по проценту контроля</strong> — чтобы его стык не стал лишним контрольным и линия не была переконтролирована. Если у всех сварщиков на линии процент контроля уже закрыт, макрос <strong>подбирает нового сварщика</strong>, который подходит по допуску на максимальное количество стыков с этой линии. Результат — готовое наряд-задание с проставленными клеймами.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <p class="screenshots-label" data-ru="Скриншоты (нажмите для увеличения):" data-en="Screenshots (click to enlarge):">Скриншоты (нажмите для увеличения):</p>
+          <div class="screenshots screenshots-4" id="gallery-stamps">
+            <div class="screenshot-item" onclick="openLightbox('gallery-stamps', 0)">
+              <img src="photos_macros/stamp_selection/01_main.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Главная" data-en="Main sheet">Главная</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-stamps', 1)">
+              <img src="photos_macros/stamp_selection/02_original.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Наряд-задание" data-en="Work order">Наряд-задание</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-stamps', 2)">
+              <img src="photos_macros/stamp_selection/03_imported.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="После импорта" data-en="After import">После импорта</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-stamps', 3)">
+              <img src="photos_macros/stamp_selection/04_stamps.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Клейма проставлены" data-en="Stamps assigned">Клейма проставлены</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ Macro 4: Проверка сварочного журнала ═══════════ -->
+    <div class="project-card anim-up anim-up-4" id="macro-4">
+      <div class="card-header" onclick="toggleCard('macro-4')">
+        <div class="project-icon">📗</div>
+        <div class="header-text">
+          <h3 data-ru="Проверка сварочного журнала" data-en="Welding Log Verification">Проверка сварочного журнала</h3>
+          <span class="header-brief" data-ru="Проверка всех клейм журнала на допуск по диаметру, толщине, материалу и дате" data-en="Verification of all stamps against certifications for diameter, thickness, material & date">Проверка всех клейм журнала на допуск по диаметру, толщине, материалу и дате</span>
+        </div>
+        <span class="project-number">04</span>
+        <div class="card-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="card-body">
+        <div class="card-body-inner">
+          <p class="project-desc"
+             data-ru="Макрос для полной проверки <strong>сварочного журнала</strong>. По нажатию одной кнопки импортируется весь журнал и база данных сварщиков, после чего <strong>каждый стык</strong> проверяется — имеет ли указанное клеймо допуск на данный диаметр, толщину и материал, а также подходит ли сварщик <strong>по дате</strong> (действителен ли его допуск на момент сварки)."
+             data-en="A macro for complete <strong>welding log</strong> verification. With a single button press, the entire log and welder database are imported, then <strong>every joint</strong> is checked — whether the assigned stamp holds certification for the given diameter, thickness, and material, and whether the welder's certification is <strong>valid on the welding date</strong>.">
+            Макрос для полной проверки <strong>сварочного журнала</strong>. По нажатию одной кнопки импортируется весь журнал и база данных сварщиков, после чего <strong>каждый стык</strong> проверяется — имеет ли указанное клеймо допуск на данный диаметр, толщину и материал, а также подходит ли сварщик <strong>по дате</strong> (действителен ли его допуск на момент сварки).
+          </p>
+
+          <ul class="feature-list">
+            <li data-ru="Импорт <strong>всего</strong> сварочного журнала и базы данных сварщиков" data-en="Import of the <strong>entire</strong> welding log and welder database">Импорт <strong>всего</strong> сварочного журнала и базы данных сварщиков</li>
+            <li data-ru="Проверка каждого стыка: <strong>диаметр</strong>, <strong>толщина</strong>, <strong>материал</strong>, <strong>дата допуска</strong>" data-en="Each joint checked: <strong>diameter</strong>, <strong>thickness</strong>, <strong>material</strong>, <strong>certification date</strong>">Проверка каждого стыка: <strong>диаметр</strong>, <strong>толщина</strong>, <strong>материал</strong>, <strong>дата допуска</strong></li>
+            <li data-ru="Результат: допуск есть — <strong style='color:#4ade80;'>зелёный</strong>, допуска нет — <strong style='color:#f87171;'>красный</strong>" data-en="Result: certified — <strong style='color:#4ade80;'>green</strong>, not certified — <strong style='color:#f87171;'>red</strong>">Результат: допуск есть — <strong style='color:#4ade80;'>зелёный</strong>, допуска нет — <strong style='color:#f87171;'>красный</strong></li>
+          </ul>
+
+          <p class="screenshots-label" data-ru="Скриншоты (нажмите для увеличения):" data-en="Screenshots (click to enlarge):">Скриншоты (нажмите для увеличения):</p>
+          <div class="screenshots screenshots-4" id="gallery-journal">
+            <div class="screenshot-item" onclick="openLightbox('gallery-journal', 0)">
+              <img src="photos_macros/journal_check/01_main.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Главная" data-en="Main sheet">Главная</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-journal', 1)">
+              <img src="photos_macros/journal_check/02_welders.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="База сварщиков" data-en="Welder database">База сварщиков</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-journal', 2)">
+              <img src="photos_macros/journal_check/03_before.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Журнал до проверки" data-en="Log before check">Журнал до проверки</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-journal', 3)">
+              <img src="photos_macros/journal_check/04_after.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Журнал после проверки" data-en="Log after check">Журнал после проверки</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ Macro 5: Подбор техкарт ═══════════ -->
+    <div class="project-card anim-up anim-up-5" id="macro-5">
+      <div class="card-header" onclick="toggleCard('macro-5')">
+        <div class="project-icon">📑</div>
+        <div class="header-text">
+          <h3 data-ru="Подбор техкарт" data-en="Tech Card Selection">Подбор техкарт</h3>
+          <span class="header-brief" data-ru="Автоподбор технологических карт по материалу, диаметру, толщине и способу сварки" data-en="Auto-selection of tech cards by material, diameter, thickness & welding method">Автоподбор технологических карт по материалу, диаметру, толщине и способу сварки</span>
+        </div>
+        <span class="project-number">05</span>
+        <div class="card-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="card-body">
+        <div class="card-body-inner">
+          <p class="project-desc"
+             data-ru="Макрос работает прямо в открытом <strong>сварочном журнале</strong>. По нажатию кнопки импортируется <strong>перечень техкарт</strong>, затем макрос анализирует журнал — находит стыки, на которые нужно проставить техкарту, и подбирает подходящую карту из перечня в зависимости от <strong>материала</strong>, <strong>диаметра</strong>, <strong>толщины</strong> и <strong>способа сварки</strong> стыка."
+             data-en="The macro works directly in the open <strong>welding log</strong>. On button press, the <strong>tech card registry</strong> is imported, then the macro analyzes the log — finds joints that need a tech card assigned and selects the matching card from the registry based on the joint's <strong>material</strong>, <strong>diameter</strong>, <strong>thickness</strong>, and <strong>welding method</strong>.">
+            Макрос работает прямо в открытом <strong>сварочном журнале</strong>. По нажатию кнопки импортируется <strong>перечень техкарт</strong>, затем макрос анализирует журнал — находит стыки, на которые нужно проставить техкарту, и подбирает подходящую карту из перечня в зависимости от <strong>материала</strong>, <strong>диаметра</strong>, <strong>толщины</strong> и <strong>способа сварки</strong> стыка.
+          </p>
+
+          <ul class="feature-list">
+            <li data-ru="Импорт <strong>перечня техкарт</strong> по нажатию одной кнопки" data-en="Import of the <strong>tech card registry</strong> with a single button press">Импорт <strong>перечня техкарт</strong> по нажатию одной кнопки</li>
+            <li data-ru="Анализ журнала: поиск стыков <strong>без техкарты</strong>" data-en="Log analysis: finding joints <strong>without a tech card</strong>">Анализ журнала: поиск стыков <strong>без техкарты</strong></li>
+            <li data-ru="Подбор по <strong>материалу</strong>, <strong>диаметру</strong>, <strong>толщине</strong> и <strong>способу сварки</strong>" data-en="Selection by <strong>material</strong>, <strong>diameter</strong>, <strong>thickness</strong>, and <strong>welding method</strong>">Подбор по <strong>материалу</strong>, <strong>диаметру</strong>, <strong>толщине</strong> и <strong>способу сварки</strong></li>
+          </ul>
+
+          <p class="screenshots-label" data-ru="Скриншоты (нажмите для увеличения):" data-en="Screenshots (click to enlarge):">Скриншоты (нажмите для увеличения):</p>
+          <div class="screenshots screenshots-4" id="gallery-techcard">
+            <div class="screenshot-item" onclick="openLightbox('gallery-techcard', 0)">
+              <img src="photos_macros/techcard_selection/01_main.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Главная" data-en="Main sheet">Главная</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-techcard', 1)">
+              <img src="photos_macros/techcard_selection/02_techcards.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Перечень техкарт" data-en="Tech card registry">Перечень техкарт</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-techcard', 2)">
+              <img src="photos_macros/techcard_selection/03_before.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Журнал до заполнения" data-en="Log before filling">Журнал до заполнения</span>
+            </div>
+            <div class="screenshot-item" onclick="openLightbox('gallery-techcard', 3)">
+              <img src="photos_macros/techcard_selection/04_after.png" alt="" loading="lazy">
+              <span class="zoom-icon">🔍</span>
+              <span class="screenshot-caption" data-ru="Журнал после заполнения" data-en="Log after filling">Журнал после заполнения</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span data-ru="© 2026 — Кузнецов Илья Сергеевич" data-en="© 2026 — Ilya S. Kuznetsov">© 2026 — Кузнецов Илья Сергеевич</span>
+    </div>
+
+  </div>
+
+  <script>
+    /* ── Card Toggle ── */
+    function toggleCard(cardId) {
+      const card = document.getElementById(cardId);
+      const body = card.querySelector('.card-body');
+      
+      if (card.classList.contains('expanded')) {
+        body.style.maxHeight = '0px';
+        card.classList.remove('expanded');
+      } else {
+        card.classList.add('expanded');
+        body.style.maxHeight = body.scrollHeight + 'px';
+      }
+    }
+
+    /* ── Language ── */
+
+    /* ── Lightbox ── */
+    let currentGallery = null;
+    let currentIndex = 0;
+
+    function getGalleryImages(galleryId) {
+      return document.getElementById(galleryId).querySelectorAll('.screenshot-item');
+    }
+
+    function openLightbox(galleryId, index) {
+      currentGallery = galleryId;
+      currentIndex = index;
+      const items = getGalleryImages(galleryId);
+      const img = items[index].querySelector('img');
+      const caption = items[index].querySelector('.screenshot-caption');
+      document.getElementById('lightbox-img').src = img.src;
+      document.getElementById('lightbox-caption').textContent = caption.textContent;
+      document.getElementById('lightbox').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(e) {
+      if (e && (e.target.classList.contains('lightbox-nav') || e.target.closest('.lightbox-nav'))) return;
+      if (e && e.target.tagName === 'IMG') return;
+      document.getElementById('lightbox').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function navLightbox(dir, e) {
+      e.stopPropagation();
+      const items = getGalleryImages(currentGallery);
+      currentIndex = (currentIndex + dir + items.length) % items.length;
+      const img = items[currentIndex].querySelector('img');
+      const caption = items[currentIndex].querySelector('.screenshot-caption');
+      document.getElementById('lightbox-img').src = img.src;
+      document.getElementById('lightbox-caption').textContent = caption.textContent;
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('lightbox').classList.contains('active')) return;
+      if (e.key === 'Escape') closeLightbox(null);
+      if (e.key === 'ArrowLeft') navLightbox(-1, e);
+      if (e.key === 'ArrowRight') navLightbox(1, e);
+    });
+  </script>
+
+
+  <script>
+    (function() {
+      const lang = localStorage.getItem('lang') || 'ru';
+      if (lang === 'en') {
+        const btnRu = document.getElementById('btn-ru');
+        const btnEn = document.getElementById('btn-en');
+        if (btnRu) btnRu.classList.remove('active');
+        if (btnEn) btnEn.classList.add('active');
+        document.querySelectorAll('[data-ru]').forEach(el => {
+          const val = el.getAttribute('data-en');
+          if (val) el.innerHTML = val;
+        });
+        document.documentElement.lang = 'en';
+      }
+    })();
+  </script>
+  <script src="/lang.js"></script>
+</body>
+</html>
